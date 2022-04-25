@@ -9,29 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	cbor "github.com/ipfs/go-ipld-cbor"
 	"github.com/minio/blake2b-simd"
 	"github.com/multiformats/go-varint"
-	"github.com/polydawn/refmt/obj/atlas"
 	"golang.org/x/xerrors"
 
 	cbg "github.com/whyrusleeping/cbor-gen"
 )
-
-func init() {
-	cbor.RegisterCborType(addressAtlasEntry)
-}
-
-var addressAtlasEntry = atlas.BuildEntry(Address{}).Transform().
-	TransformMarshal(atlas.MakeMarshalTransformFunc(
-		func(a Address) (string, error) {
-			return string(a.Bytes()), nil
-		})).
-	TransformUnmarshal(atlas.MakeUnmarshalTransformFunc(
-		func(x string) (Address, error) {
-			return NewFromBytes([]byte(x))
-		})).
-	Complete()
 
 // CurrentNetwork specifies which network the address belongs to
 var CurrentNetwork = Testnet
@@ -109,16 +92,6 @@ func (a Address) String() string {
 // Empty returns true if the address is empty, false otherwise.
 func (a Address) Empty() bool {
 	return a == Undef
-}
-
-// Unmarshal unmarshals the cbor bytes into the address.
-func (a Address) Unmarshal(b []byte) error {
-	return cbor.DecodeInto(b, &a)
-}
-
-// Marshal marshals the address to cbor.
-func (a Address) Marshal() ([]byte, error) {
-	return cbor.DumpObject(a)
 }
 
 // UnmarshalJSON implements the json unmarshal interface.
